@@ -1581,10 +1581,12 @@ call_ad(struct sock *ctnl, struct sk_buff *skb, struct ip_set *set,
 }
 
 static int
-IPSET_CBFN(ip_set_uadd, struct net *net, struct sock *ctnl,
-	   struct sk_buff *skb, const struct nlmsghdr *nlh,
-	   const struct nlattr * const attr[],
-	   struct netlink_ext_ack *extack)
+IPSET_CBFN_AD(ip_set_ad, struct net *net, struct sock *ctnl,
+	      struct sk_buff *skb,
+	      enum ipset_adt adt,
+	      const struct nlmsghdr *nlh,
+	      const struct nlattr * const attr[],
+	      struct netlink_ext_ack *extack)
 {
 	struct ip_set_net *inst = ip_set_pernet(IPSET_SOCK_NET(net, ctnl));
 	struct ip_set *set;
@@ -1615,7 +1617,7 @@ IPSET_CBFN(ip_set_uadd, struct net *net, struct sock *ctnl,
 				     attr[IPSET_ATTR_DATA],
 				     set->type->adt_policy, NULL))
 			return -IPSET_ERR_PROTOCOL;
-		ret = call_ad(ctnl, skb, set, tb, IPSET_ADD, flags,
+		ret = call_ad(ctnl, skb, set, tb, adt, flags,
 			      use_lineno);
 	} else {
 		int nla_rem;
@@ -1626,7 +1628,7 @@ IPSET_CBFN(ip_set_uadd, struct net *net, struct sock *ctnl,
 			    NLA_PARSE_NESTED(tb, IPSET_ATTR_ADT_MAX, nla,
 					     set->type->adt_policy, NULL))
 				return -IPSET_ERR_PROTOCOL;
-			ret = call_ad(ctnl, skb, set, tb, IPSET_ADD,
+			ret = call_ad(ctnl, skb, set, tb, adt,
 				      flags, use_lineno);
 			if (ret < 0)
 				return ret;
@@ -1636,58 +1638,23 @@ IPSET_CBFN(ip_set_uadd, struct net *net, struct sock *ctnl,
 }
 
 static int
+IPSET_CBFN(ip_set_uadd, struct net *net, struct sock *ctnl,
+	   struct sk_buff *skb, const struct nlmsghdr *nlh,
+	   const struct nlattr * const attr[],
+	   struct netlink_ext_ack *extack)
+{
+	return IPSET_CBFN_AD(ip_set_ad, net, ctnl, skb,
+			     IPSET_ADD, nlh, attr, extack);
+}
+
+static int
 IPSET_CBFN(ip_set_udel, struct net *net, struct sock *ctnl,
 	   struct sk_buff *skb, const struct nlmsghdr *nlh,
 	   const struct nlattr * const attr[],
 	   struct netlink_ext_ack *extack)
 {
-	struct ip_set_net *inst = ip_set_pernet(IPSET_SOCK_NET(net, ctnl));
-	struct ip_set *set;
-	struct nlattr *tb[IPSET_ATTR_ADT_MAX + 1] = {};
-	const struct nlattr *nla;
-	u32 flags = flag_exist(nlh);
-	bool use_lineno;
-	int ret = 0;
-
-	if (unlikely(protocol_min_failed(attr) ||
-		     !attr[IPSET_ATTR_SETNAME] ||
-		     !((attr[IPSET_ATTR_DATA] != NULL) ^
-		       (attr[IPSET_ATTR_ADT] != NULL)) ||
-		     (attr[IPSET_ATTR_DATA] &&
-		      !flag_nested(attr[IPSET_ATTR_DATA])) ||
-		     (attr[IPSET_ATTR_ADT] &&
-		      (!flag_nested(attr[IPSET_ATTR_ADT]) ||
-		       !attr[IPSET_ATTR_LINENO]))))
-		return -IPSET_ERR_PROTOCOL;
-
-	set = find_set(inst, nla_data(attr[IPSET_ATTR_SETNAME]));
-	if (!set)
-		return -ENOENT;
-
-	use_lineno = !!attr[IPSET_ATTR_LINENO];
-	if (attr[IPSET_ATTR_DATA]) {
-		if (NLA_PARSE_NESTED(tb, IPSET_ATTR_ADT_MAX,
-				     attr[IPSET_ATTR_DATA],
-				     set->type->adt_policy, NULL))
-			return -IPSET_ERR_PROTOCOL;
-		ret = call_ad(ctnl, skb, set, tb, IPSET_DEL, flags,
-			      use_lineno);
-	} else {
-		int nla_rem;
-
-		nla_for_each_nested(nla, attr[IPSET_ATTR_ADT], nla_rem) {
-			if (nla_type(nla) != IPSET_ATTR_DATA ||
-			    !flag_nested(nla) ||
-			    NLA_PARSE_NESTED(tb, IPSET_ATTR_ADT_MAX, nla,
-					     set->type->adt_policy, NULL))
-				return -IPSET_ERR_PROTOCOL;
-			ret = call_ad(ctnl, skb, set, tb, IPSET_DEL,
-				      flags, use_lineno);
-			if (ret < 0)
-				return ret;
-		}
-	}
-	return ret;
+	return IPSET_CBFN_AD(ip_set_ad, net, ctnl, skb,
+			     IPSET_DEL, nlh, attr, extack);
 }
 
 static int
