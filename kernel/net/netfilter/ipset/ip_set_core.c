@@ -1621,7 +1621,6 @@ IPSET_CBFN(ip_set_uadd, struct net *net, struct sock *ctnl,
 		int nla_rem;
 
 		nla_for_each_nested(nla, attr[IPSET_ATTR_ADT], nla_rem) {
-			memset(tb, 0, sizeof(tb));
 			if (nla_type(nla) != IPSET_ATTR_DATA ||
 			    !flag_nested(nla) ||
 			    NLA_PARSE_NESTED(tb, IPSET_ATTR_ADT_MAX, nla,
@@ -1677,7 +1676,6 @@ IPSET_CBFN(ip_set_udel, struct net *net, struct sock *ctnl,
 		int nla_rem;
 
 		nla_for_each_nested(nla, attr[IPSET_ATTR_ADT], nla_rem) {
-			memset(tb, 0, sizeof(*tb));
 			if (nla_type(nla) != IPSET_ATTR_DATA ||
 			    !flag_nested(nla) ||
 			    NLA_PARSE_NESTED(tb, IPSET_ATTR_ADT_MAX, nla,
