@@ -1303,10 +1303,13 @@ dump_init(struct netlink_callback *cb, struct ip_set_net *inst)
 	struct nlattr *attr = (void *)nlh + min_len;
 	u32 dump_type;
 	ip_set_id_t index;
+	int ret;
 
-	/* Second pass, so parser can't fail */
-	NLA_PARSE(cda, IPSET_ATTR_CMD_MAX, attr, nlh->nlmsg_len - min_len,
-		  ip_set_setname_policy, NULL);
+	ret = NLA_PARSE(cda, IPSET_ATTR_CMD_MAX, attr,
+			nlh->nlmsg_len - min_len,
+			ip_set_setname_policy, NULL);
+	if (ret)
+		return ret;
 
 	cb->args[IPSET_CB_PROTO] = nla_get_u8(cda[IPSET_ATTR_PROTOCOL]);
 	if (cda[IPSET_ATTR_SETNAME]) {
