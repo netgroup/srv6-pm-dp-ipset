@@ -479,6 +479,7 @@ set_target_v3_checkentry(const struct xt_tgchk_param *par)
 {
 	const struct xt_set_info_target_v3 *info = par->targinfo;
 	ip_set_id_t index;
+	int ret = 0;
 
 	if (info->add_set.index != IPSET_INVALID_ID) {
 		index = ip_set_nfnl_get_byindex(XT_PAR_NET(par),
@@ -496,17 +497,16 @@ set_target_v3_checkentry(const struct xt_tgchk_param *par)
 		if (index == IPSET_INVALID_ID) {
 			pr_warn("Cannot find del_set index %u as target\n",
 				info->del_set.index);
-			if (info->add_set.index != IPSET_INVALID_ID)
-				ip_set_nfnl_put(XT_PAR_NET(par),
-						info->add_set.index);
-			return CHECK_FAIL(-ENOENT);
+			ret = -ENOENT;
+			goto cleanup_add;
 		}
 	}
 
 	if (info->map_set.index != IPSET_INVALID_ID) {
 		if (strncmp(par->table, "mangle", 7)) {
 			pr_warn("--map-set only usable from mangle table\n");
-			return CHECK_FAIL(-EINVAL);
+			ret = -EINVAL;
+			goto cleanup_del;
 		}
 		if (((info->flags & IPSET_FLAG_MAP_SKBPRIO) |
 		     (info->flags & IPSET_FLAG_MAP_SKBQUEUE)) &&
@@ -514,20 +514,16 @@ set_target_v3_checkentry(const struct xt_tgchk_param *par)
 					 1 << NF_INET_LOCAL_OUT |
 					 1 << NF_INET_POST_ROUTING))) {
 			pr_warn("mapping of prio or/and queue is allowed only from OUTPUT/FORWARD/POSTROUTING chains\n");
-			return CHECK_FAIL(-EINVAL);
+			ret = -EINVAL;
+			goto cleanup_del;
 		}
 		index = ip_set_nfnl_get_byindex(XT_PAR_NET(par),
 						info->map_set.index);
 		if (index == IPSET_INVALID_ID) {
 			pr_warn("Cannot find map_set index %u as target\n",
 				info->map_set.index);
-			if (info->add_set.index != IPSET_INVALID_ID)
-				ip_set_nfnl_put(XT_PAR_NET(par),
-						info->add_set.index);
-			if (info->del_set.index != IPSET_INVALID_ID)
-				ip_set_nfnl_put(XT_PAR_NET(par),
-						info->del_set.index);
-			return CHECK_FAIL(-ENOENT);
+			ret = -ENOENT;
+			goto cleanup_del;
 		}
 	}
 
@@ -535,16 +531,21 @@ set_target_v3_checkentry(const struct xt_tgchk_param *par)
 	    info->del_set.dim > IPSET_DIM_MAX ||
 	    info->map_set.dim > IPSET_DIM_MAX) {
 		pr_warn("Protocol error: SET target dimension is over the limit!\n");
-		if (info->add_set.index != IPSET_INVALID_ID)
-			ip_set_nfnl_put(XT_PAR_NET(par), info->add_set.index);
-		if (info->del_set.index != IPSET_INVALID_ID)
-			ip_set_nfnl_put(XT_PAR_NET(par), info->del_set.index);
-		if (info->map_set.index != IPSET_INVALID_ID)
-			ip_set_nfnl_put(XT_PAR_NET(par), info->map_set.index);
-		return CHECK_FAIL(-ERANGE);
+		ret = -ERANGE;
+		goto cleanup_mark;
 	}
 
 	return CHECK_OK;
+cleanup_mark:
+	if (info->map_set.index != IPSET_INVALID_ID)
+		ip_set_nfnl_put(XT_PAR_NET(par), info->map_set.index);
+cleanup_del:
+	if (info->del_set.index != IPSET_INVALID_ID)
+		ip_set_nfnl_put(XT_PAR_NET(par), info->del_set.index);
+cleanup_add:
+	if (info->add_set.index != IPSET_INVALID_ID)
+		ip_set_nfnl_put(XT_PAR_NET(par), info->add_set.index);
+	return CHECK_FAIL(ret);
 }
 
 static void
