@@ -1,4 +1,4 @@
-/* Copyright 2007-2010 Jozsef Kadlecsik (kadlec@blackhole.kfki.hu)
+/* Copyright 2007-2010 Jozsef Kadlecsik (kadlec@netfilter.org)
  * Copyright 2013 Oliver Smith (oliver@8.c.9.b.0.7.4.0.1.0.0.2.ip6.arpa)
  *
  * This program is free software; you can redistribute it and/or modify
