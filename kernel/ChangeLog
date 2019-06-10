@@ -1,3 +1,12 @@
+7.2
+  - Update my email address
+  - ipset: Fix memory accounting for hash types on resize (Stefano Brivio)
+  - Fix error path in set_target_v3_checkentry()
+  - Fix the last missing check of nla_parse()
+  - netfilter: ipset: fix a missing check of nla_parse (Aditya Pakki)
+  - netfilter: ipset: merge uadd and udel functions (Florent Fourcot)
+  - netfilter: ipset: remove useless memset() calls (Florent Fourcot)
+
 7.1
   - netfilter/ipset: replace a strncpy() with strscpy() (Qian Cai)
   - netfilter: ipset: fix ip_set_byindex function (Florent Fourcot)
