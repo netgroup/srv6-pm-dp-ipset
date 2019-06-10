@@ -402,6 +402,13 @@ ip_set_get_h16(const struct nlattr *attr)
 	return ntohs(nla_get_be16(attr));
 }
 
+/* In order to support older kernels before patch ae0be8de9a53cda3:
+ *
+ * netlink: make nla_nest_start() add NLA_F_NESTED flag
+ *
+ * we have to keep  ipset_nest_start() ipset_nest_end()
+ * in the package source
+*/
 #define ipset_nest_start(skb, attr) nla_nest_start(skb, attr | NLA_F_NESTED)
 #define ipset_nest_end(skb, start)  nla_nest_end(skb, start)
 
