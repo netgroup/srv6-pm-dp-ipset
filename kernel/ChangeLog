@@ -1,3 +1,10 @@
+7.3
+  -  Fix rename concurrency with listing
+  - ipset: Copy the right MAC address in bitmap:ip,mac and
+    hash:ip,mac sets (Stefano Brivio)
+  - ipset: Actually allow destination MAC address for hash:ip,mac
+    sets too (Stefano Brivio)
+
 7.2
   - Update my email address
   - ipset: Fix memory accounting for hash types on resize (Stefano Brivio)

@@ -1,3 +1,6 @@
+7.3
+  - ipset: fix spelling error in libipset.3 manpage (Neutron Soutmun)
+
 7.2
   - Update my email address
 
