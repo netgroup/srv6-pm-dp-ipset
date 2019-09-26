@@ -410,6 +410,9 @@ ipset_data_set(struct ipset_data *data, enum ipset_opt opt, const void *value)
 	case IPSET_OPT_NOMATCH:
 		cadt_flag_type_attr(data, opt, IPSET_FLAG_NOMATCH);
 		break;
+	case IPSET_OPT_IFACE_WILDCARD:
+		cadt_flag_type_attr(data, opt, IPSET_FLAG_IFACE_WILDCARD);
+		break;
 	case IPSET_OPT_FLAGS:
 		data->flags = *(const uint32_t *)value;
 		break;
@@ -433,6 +436,9 @@ ipset_data_set(struct ipset_data *data, enum ipset_opt opt, const void *value)
 		if (data->cadt_flags & IPSET_FLAG_WITH_SKBINFO)
 			ipset_data_flags_set(data,
 					     IPSET_FLAG(IPSET_OPT_SKBINFO));
+		if (data->cadt_flags & IPSET_FLAG_IFACE_WILDCARD)
+			ipset_data_flags_set(data,
+					     IPSET_FLAG(IPSET_OPT_IFACE_WILDCARD));
 		break;
 	default:
 		return -1;
@@ -564,6 +570,7 @@ ipset_data_get(const struct ipset_data *data, enum ipset_opt opt)
 	case IPSET_OPT_CREATE_COMMENT:
 	case IPSET_OPT_FORCEADD:
 	case IPSET_OPT_SKBINFO:
+	case IPSET_OPT_IFACE_WILDCARD:
 		return &data->cadt_flags;
 	default:
 		return NULL;
@@ -630,6 +637,7 @@ ipset_data_sizeof(enum ipset_opt opt, uint8_t family)
 	case IPSET_OPT_NOMATCH:
 	case IPSET_OPT_COUNTERS:
 	case IPSET_OPT_FORCEADD:
+	case IPSET_OPT_IFACE_WILDCARD:
 		return sizeof(uint32_t);
 	case IPSET_OPT_ADT_COMMENT:
 		return IPSET_MAX_COMMENT_SIZE + 1;

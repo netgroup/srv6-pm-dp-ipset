@@ -195,6 +195,14 @@ static const struct ipset_arg ipset_args[] = {
 		.print = ipset_print_flag,
 		.help = "[nomatch]",
 	},
+	[IPSET_ARG_IFACE_WILDCARD] = {
+		.name = { "wildcard", NULL },
+		.has_arg = IPSET_NO_ARG,
+		.opt = IPSET_OPT_IFACE_WILDCARD,
+		.parse = ipset_parse_flag,
+		.print = ipset_print_flag,
+		.help = "[wildcard]",
+	},
 	/* Extensions */
 	[IPSET_ARG_TIMEOUT] = {
 		.name = { "timeout", NULL },

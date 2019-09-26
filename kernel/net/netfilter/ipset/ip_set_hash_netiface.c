@@ -29,7 +29,8 @@
 /*				3    Counters support added */
 /*				4    Comments support added */
 /*				5    Forceadd support added */
-#define IPSET_TYPE_REV_MAX	6 /* skbinfo support added */
+/*				6    skbinfo support added */
+#define IPSET_TYPE_REV_MAX	7 /* interface wildcard support added */
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Jozsef Kadlecsik <kadlec@netfilter.org>");
@@ -61,6 +62,7 @@ struct hash_netiface4_elem {
 	u8 cidr;
 	u8 nomatch;
 	u8 elem;
+	u8 wildcard;
 	char iface[IFNAMSIZ];
 };
 
@@ -75,7 +77,9 @@ hash_netiface4_data_equal(const struct hash_netiface4_elem *ip1,
 	       ip1->cidr == ip2->cidr &&
 	       (++*multi) &&
 	       ip1->physdev == ip2->physdev &&
-	       strcmp(ip1->iface, ip2->iface) == 0;
+	       (ip1->wildcard ?
+		strncmp(ip1->iface, ip2->iface, strlen(ip1->iface)) == 0 :
+		strcmp(ip1->iface, ip2->iface) == 0);
 }
 
 static int
@@ -107,7 +111,8 @@ static bool
 hash_netiface4_data_list(struct sk_buff *skb,
 			 const struct hash_netiface4_elem *data)
 {
-	u32 flags = data->physdev ? IPSET_FLAG_PHYSDEV : 0;
+	u32 flags = (data->physdev ? IPSET_FLAG_PHYSDEV : 0) |
+		    (data->wildcard ? IPSET_FLAG_IFACE_WILDCARD : 0);
 
 	if (data->nomatch)
 		flags |= IPSET_FLAG_NOMATCH;
@@ -233,6 +238,8 @@ hash_netiface4_uadt(struct ip_set *set, struct nlattr *tb[],
 			e.physdev = 1;
 		if (cadt_flags & IPSET_FLAG_NOMATCH)
 			flags |= (IPSET_FLAG_NOMATCH << 16);
+		if (cadt_flags & IPSET_FLAG_IFACE_WILDCARD)
+			e.wildcard = 1;
 	}
 	if (adt == IPSET_TEST || !tb[IPSET_ATTR_IP_TO]) {
 		e.ip = htonl(ip & ip_set_hostmask(e.cidr));
@@ -284,6 +291,7 @@ struct hash_netiface6_elem {
 	u8 cidr;
 	u8 nomatch;
 	u8 elem;
+	u8 wildcard;
 	char iface[IFNAMSIZ];
 };
 
@@ -298,7 +306,9 @@ hash_netiface6_data_equal(const struct hash_netiface6_elem *ip1,
 	       ip1->cidr == ip2->cidr &&
 	       (++*multi) &&
 	       ip1->physdev == ip2->physdev &&
-	       strcmp(ip1->iface, ip2->iface) == 0;
+	       (ip1->wildcard ?
+		strncmp(ip1->iface, ip2->iface, strlen(ip1->iface)) == 0 :
+		strcmp(ip1->iface, ip2->iface) == 0);
 }
 
 static int
@@ -330,7 +340,8 @@ static bool
 hash_netiface6_data_list(struct sk_buff *skb,
 			 const struct hash_netiface6_elem *data)
 {
-	u32 flags = data->physdev ? IPSET_FLAG_PHYSDEV : 0;
+	u32 flags = (data->physdev ? IPSET_FLAG_PHYSDEV : 0) |
+		    (data->wildcard ? IPSET_FLAG_IFACE_WILDCARD : 0);
 
 	if (data->nomatch)
 		flags |= IPSET_FLAG_NOMATCH;
@@ -444,6 +455,8 @@ hash_netiface6_uadt(struct ip_set *set, struct nlattr *tb[],
 			e.physdev = 1;
 		if (cadt_flags & IPSET_FLAG_NOMATCH)
 			flags |= (IPSET_FLAG_NOMATCH << 16);
+		if (cadt_flags & IPSET_FLAG_IFACE_WILDCARD)
+			e.wildcard = 1;
 	}
 
 	ret = adtfn(set, &e, &ext, &ext, flags);

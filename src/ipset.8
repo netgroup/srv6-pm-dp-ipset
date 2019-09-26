@@ -385,6 +385,12 @@ succeed and evict a random entry from the set.
 .IP
 ipset create foo hash:ip forceadd
 .PP
+.SS wildcard
+This flag is valid when adding elements to a \fBhash:net,iface\fR set. If the
+flag is set, then prefix matching is used when comparing with this element. For
+example, an element containing the interface name "eth" will match any name with
+that prefix.
+.PP
 .SH "SET TYPES"
 .SS bitmap:ip
 The \fBbitmap:ip\fR set type uses a memory range to store either IPv4 host
@@ -957,7 +963,7 @@ address and interface name pairs.
 .PP
 \fIADD\-ENTRY\fR := \fInetaddr\fR,[\fBphysdev\fR:]\fIiface\fR
 .PP
-\fIADD\-OPTIONS\fR := [ \fBtimeout\fR \fIvalue\fR ]  [ \fBnomatch\fR ] [ \fBpackets\fR \fIvalue\fR ] [ \fBbytes\fR \fIvalue\fR ] [ \fBcomment\fR \fIstring\fR ] [ \fBskbmark\fR \fIvalue\fR ] [ \fBskbprio\fR \fIvalue\fR ] [ \fBskbqueue\fR \fIvalue\fR ]
+\fIADD\-OPTIONS\fR := [ \fBtimeout\fR \fIvalue\fR ]  [ \fBnomatch\fR ] [ \fBpackets\fR \fIvalue\fR ] [ \fBbytes\fR \fIvalue\fR ] [ \fBcomment\fR \fIstring\fR ] [ \fBskbmark\fR \fIvalue\fR ] [ \fBskbprio\fR \fIvalue\fR ] [ \fBskbqueue\fR \fIvalue\fR ] [ \fBwildcard\fR ]
 .PP
 \fIDEL\-ENTRY\fR := \fInetaddr\fR,[\fBphysdev\fR:]\fIiface\fR
 .PP

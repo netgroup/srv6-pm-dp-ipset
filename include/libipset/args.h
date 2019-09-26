@@ -44,6 +44,7 @@ enum ipset_keywords {
 	IPSET_ARG_FORCEADD,			/* forceadd */
 	IPSET_ARG_MARKMASK,			/* markmask */
 	IPSET_ARG_NOMATCH,			/* nomatch */
+	IPSET_ARG_IFACE_WILDCARD,		/* interface wildcard match */
 	/* Extensions */
 	IPSET_ARG_TIMEOUT,			/* timeout */
 	IPSET_ARG_COUNTERS,			/* counters */
