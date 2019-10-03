@@ -55,7 +55,7 @@ struct hash_netnet4_elem {
 
 /* Common functions */
 
-static inline bool
+static bool
 hash_netnet4_data_equal(const struct hash_netnet4_elem *ip1,
 			const struct hash_netnet4_elem *ip2,
 			u32 *multi)
@@ -64,32 +64,32 @@ hash_netnet4_data_equal(const struct hash_netnet4_elem *ip1,
 	       ip1->ccmp == ip2->ccmp;
 }
 
-static inline int
+static int
 hash_netnet4_do_data_match(const struct hash_netnet4_elem *elem)
 {
 	return elem->nomatch ? -ENOTEMPTY : 1;
 }
 
-static inline void
+static void
 hash_netnet4_data_set_flags(struct hash_netnet4_elem *elem, u32 flags)
 {
 	elem->nomatch = (flags >> 16) & IPSET_FLAG_NOMATCH;
 }
 
-static inline void
+static void
 hash_netnet4_data_reset_flags(struct hash_netnet4_elem *elem, u8 *flags)
 {
 	swap(*flags, elem->nomatch);
 }
 
-static inline void
+static void
 hash_netnet4_data_reset_elem(struct hash_netnet4_elem *elem,
 			     struct hash_netnet4_elem *orig)
 {
 	elem->ip[1] = orig->ip[1];
 }
 
-static inline void
+static void
 hash_netnet4_data_netmask(struct hash_netnet4_elem *elem, u8 cidr, bool inner)
 {
 	if (inner) {
@@ -120,7 +120,7 @@ nla_put_failure:
 	return true;
 }
 
-static inline void
+static void
 hash_netnet4_data_next(struct hash_netnet4_elem *next,
 		       const struct hash_netnet4_elem *d)
 {
@@ -285,7 +285,7 @@ struct hash_netnet6_elem {
 
 /* Common functions */
 
-static inline bool
+static bool
 hash_netnet6_data_equal(const struct hash_netnet6_elem *ip1,
 			const struct hash_netnet6_elem *ip2,
 			u32 *multi)
@@ -295,32 +295,32 @@ hash_netnet6_data_equal(const struct hash_netnet6_elem *ip1,
 	       ip1->ccmp == ip2->ccmp;
 }
 
-static inline int
+static int
 hash_netnet6_do_data_match(const struct hash_netnet6_elem *elem)
 {
 	return elem->nomatch ? -ENOTEMPTY : 1;
 }
 
-static inline void
+static void
 hash_netnet6_data_set_flags(struct hash_netnet6_elem *elem, u32 flags)
 {
 	elem->nomatch = (flags >> 16) & IPSET_FLAG_NOMATCH;
 }
 
-static inline void
+static void
 hash_netnet6_data_reset_flags(struct hash_netnet6_elem *elem, u8 *flags)
 {
 	swap(*flags, elem->nomatch);
 }
 
-static inline void
+static void
 hash_netnet6_data_reset_elem(struct hash_netnet6_elem *elem,
 			     struct hash_netnet6_elem *orig)
 {
 	elem->ip[1] = orig->ip[1];
 }
 
-static inline void
+static void
 hash_netnet6_data_netmask(struct hash_netnet6_elem *elem, u8 cidr, bool inner)
 {
 	if (inner) {
@@ -351,7 +351,7 @@ nla_put_failure:
 	return true;
 }
 
-static inline void
+static void
 hash_netnet6_data_next(struct hash_netnet6_elem *next,
 		       const struct hash_netnet6_elem *d)
 {

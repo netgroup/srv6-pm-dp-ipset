@@ -48,7 +48,7 @@ struct hash_ip4_elem {
 
 /* Common functions */
 
-static inline bool
+static bool
 hash_ip4_data_equal(const struct hash_ip4_elem *e1,
 		    const struct hash_ip4_elem *e2,
 		    u32 *multi)
@@ -67,7 +67,7 @@ nla_put_failure:
 	return true;
 }
 
-static inline void
+static void
 hash_ip4_data_next(struct hash_ip4_elem *next, const struct hash_ip4_elem *e)
 {
 	next->ip = e->ip;
@@ -175,7 +175,7 @@ struct hash_ip6_elem {
 
 /* Common functions */
 
-static inline bool
+static bool
 hash_ip6_data_equal(const struct hash_ip6_elem *ip1,
 		    const struct hash_ip6_elem *ip2,
 		    u32 *multi)
@@ -183,7 +183,7 @@ hash_ip6_data_equal(const struct hash_ip6_elem *ip1,
 	return ipv6_addr_equal(&ip1->ip.in6, &ip2->ip.in6);
 }
 
-static inline void
+static void
 hash_ip6_netmask(union nf_inet_addr *ip, u8 prefix)
 {
 	ip6_netmask(ip, prefix);
@@ -200,7 +200,7 @@ nla_put_failure:
 	return true;
 }
 
-static inline void
+static void
 hash_ip6_data_next(struct hash_ip6_elem *next, const struct hash_ip6_elem *e)
 {
 }

@@ -71,7 +71,7 @@ struct bitmap_ipmac_elem {
 	unsigned char filled;
 } __aligned(__alignof__(u64));
 
-static inline u32
+static u32
 ip_to_id(const struct bitmap_ipmac *m, u32 ip)
 {
 	return ip - m->first_ip;
@@ -85,7 +85,7 @@ ip_to_id(const struct bitmap_ipmac *m, u32 ip)
 
 /* Common functions */
 
-static inline int
+static int
 bitmap_ipmac_do_test(const struct bitmap_ipmac_adt_elem *e,
 		     const struct bitmap_ipmac *map, size_t dsize)
 {
@@ -100,7 +100,7 @@ bitmap_ipmac_do_test(const struct bitmap_ipmac_adt_elem *e,
 	return -EAGAIN;
 }
 
-static inline int
+static int
 bitmap_ipmac_gc_test(u16 id, const struct bitmap_ipmac *map, size_t dsize)
 {
 	const struct bitmap_ipmac_elem *elem;
@@ -112,13 +112,13 @@ bitmap_ipmac_gc_test(u16 id, const struct bitmap_ipmac *map, size_t dsize)
 	return elem->filled == MAC_FILLED;
 }
 
-static inline int
+static int
 bitmap_ipmac_is_filled(const struct bitmap_ipmac_elem *elem)
 {
 	return elem->filled == MAC_FILLED;
 }
 
-static inline int
+static int
 bitmap_ipmac_add_timeout(unsigned long *timeout,
 			 const struct bitmap_ipmac_adt_elem *e,
 			 const struct ip_set_ext *ext, struct ip_set *set,
@@ -145,7 +145,7 @@ bitmap_ipmac_add_timeout(unsigned long *timeout,
 	return 0;
 }
 
-static inline int
+static int
 bitmap_ipmac_do_add(const struct bitmap_ipmac_adt_elem *e,
 		    struct bitmap_ipmac *map, u32 flags, size_t dsize)
 {
@@ -183,14 +183,14 @@ bitmap_ipmac_do_add(const struct bitmap_ipmac_adt_elem *e,
 	return IPSET_ADD_STORE_PLAIN_TIMEOUT;
 }
 
-static inline int
+static int
 bitmap_ipmac_do_del(const struct bitmap_ipmac_adt_elem *e,
 		    struct bitmap_ipmac *map)
 {
 	return !test_and_clear_bit(e->id, map->members);
 }
 
-static inline int
+static int
 bitmap_ipmac_do_list(struct sk_buff *skb, const struct bitmap_ipmac *map,
 		     u32 id, size_t dsize)
 {
@@ -203,7 +203,7 @@ bitmap_ipmac_do_list(struct sk_buff *skb, const struct bitmap_ipmac *map,
 		nla_put(skb, IPSET_ATTR_ETHER, ETH_ALEN, elem->ether));
 }
 
-static inline int
+static int
 bitmap_ipmac_do_head(struct sk_buff *skb, const struct bitmap_ipmac *map)
 {
 	return nla_put_ipaddr4(skb, IPSET_ATTR_IP, htonl(map->first_ip)) ||
