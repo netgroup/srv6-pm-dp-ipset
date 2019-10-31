@@ -64,6 +64,7 @@ struct ipset_session {
 	ipset_print_outfn print_outfn;		/* Output function to file */
 	void *p;				/* Private data for print_outfn */
 	bool sort;				/* Print sorted hash:* types */
+	size_t save_elem_prefix;		/* "add setname " */
 	/* Session IO */
 	bool normal_io, full_io;		/* Default/normal/full IO */
 	FILE *istream, *ostream;		/* Session input/output stream */
@@ -979,6 +980,7 @@ list_create(struct ipset_session *session, struct nlattr *nla[])
 		return MNL_CB_ERROR;
 	family = ipset_data_family(data);
 
+	session->save_elem_prefix = strlen(ipset_data_setname(data)) + 5;
 	switch (session->mode) {
 	case IPSET_LIST_SAVE:
 		safe_snprintf(session, "create %s %s",
@@ -1084,15 +1086,89 @@ list_create(struct ipset_session *session, struct nlattr *nla[])
 	return MNL_CB_OK;
 }
 
+/* "<member><elem>" */
+#define XML_ELEM_PREFIX_LEN	14
+
+/* Core should handle sorting more directly */
 static int
 bystrcmp(void *priv, struct list_head *a, struct list_head *b)
 {
 	struct ipset_session *session = priv;
 	struct ipset_sorted *x = list_entry(a, struct ipset_sorted, list);
 	struct ipset_sorted *y = list_entry(b, struct ipset_sorted, list);
+	char *sep1, *x1 = session->outbuf + x->offset;
+	char *sep2, *x2 = session->outbuf + y->offset;
+	long int n1, n2;
+	int neg = 1;
 
-	return strcmp(session->outbuf + x->offset,
-		      session->outbuf + y->offset);
+	if (session->envopts & IPSET_ENV_RESOLVE)
+		return strcmp(x1, x2);
+
+	/* Skip prefix */
+	switch (session->mode) {
+	case IPSET_LIST_SAVE:
+		/* "add setname " */
+		x1 += session->save_elem_prefix;
+		x2 += session->save_elem_prefix;
+		break;
+	case IPSET_LIST_XML:
+		/* "<member><elem>" */
+		x1 += XML_ELEM_PREFIX_LEN;
+		x2 += XML_ELEM_PREFIX_LEN;
+		break;
+	default:
+		break;
+	}
+
+	while (*x1 != '\0' && *x2 != '\0') {
+		n1 = strtol(x1, &sep1, 16);
+		n2 = strtol(x2, &sep2, 16);
+		if (x1 == sep1 || x2 == sep2) {
+			/* No leading numbers: proto:port, iface, setname */
+			n1 = strcspn(x1, ":,");
+			n2 = strcspn(x2, ":,");
+			if (n1 != 0 || n2 != 0) {
+				if (n1 == n2) {
+					n2 = strncmp(x1, x2, n1);
+					if (n2 == 0) {
+						x1 += n1 + 1;
+						x2 += n1 + 1;
+						neg = 1;
+						continue;
+					}
+					return n2;
+				}
+				return n1 < n2 ? -1 : 1;
+			}
+			/* Setname or iface */
+			return strcmp(x1, x2);
+		}
+		/* Leading numbers found */
+		if (n1 != n2)
+			return neg * (n1 - n2);
+		/* Check subnet separator */
+		if (*sep1 == '/' || *sep2 == '/') {
+			if (*sep1 == *sep2)
+				neg = *sep1 == '/' ? -1 : 1;
+			else if (*sep1 == '/')
+				return 1;
+			else
+				return -1;
+		}
+		x1 = ++sep1;
+		x2 = ++sep2;
+		/* Handle IPv6 '::' case */
+		if (*x1 == ':' || *x2 == ':') {
+			if (*x1 == *x2) {
+				x1++;
+				x2++;
+			} else if (*x1 == ':')
+				return -1;
+			else
+				return 1;
+		}
+	}
+	return *x1 != '\0' ? 1 : (*x2 != '\0' ? -1 : 0);
 }
 
 static int
