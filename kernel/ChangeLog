@@ -1,3 +1,28 @@
+7.4
+  - Fix nla_policies to fully support NL_VALIDATE_STRICT
+  - treewide: Replace GPLv2 boilerplate/reference with SPDX - rule 500
+    (Thomas Gleixner)
+  - netfilter: remove unnecessary spaces (yangxingwu)
+  - ipset: Add wildcard support to net,iface (Kristian Evensen)
+  - ipset: Copy the right MAC address in hash:ip,mac IPv6 sets
+    (Stefano Brivio)
+  - netfilter: ipset: move ip_set_get_ip_port() to ip_set_bitmap_port.c.
+    (Jeremy Sowden)
+  - netfilter: ipset: move function to ip_set_bitmap_ip.c. (Jeremy Sowden)
+  - netfilter: ipset: make ip_set_put_flags extern. (Jeremy Sowden)
+  - netfilter: ipset: move functions to ip_set_core.c. (Jeremy Sowden)
+  - netfilter: ipset: move ip_set_comment functions from ip_set.h
+    to ip_set_core.c. (Jeremy Sowden)
+  - netfilter: ipset: remove inline from static functions in .c files.
+    (Jeremy Sowden)
+  - netfilter: ipset: add a coding-style fix to ip_set_ext_destroy.
+    (Jeremy Sowden)
+  - netfilter: added missing includes to a number of header-files.
+    (Jeremy Sowden)
+  - netfilter: inlined four headers files into another one. (Jeremy Sowden)
+  - netfilter: ipset: Fix an error code in ip_set_sockfn_get()
+    (Dan Carpenter)
+
 7.3
   -  Fix rename concurrency with listing
   - ipset: Copy the right MAC address in bitmap:ip,mac and

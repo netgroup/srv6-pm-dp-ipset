@@ -1,3 +1,13 @@
+7.4
+  - Fix compatibility support for netlink extended ACK and add
+    synchronize_rcu_bh() checking
+  - treewide: Replace GPLv2 boilerplate/reference with SPDX - rule 500
+    (Thomas Gleixner)
+  - ipset: Add wildcard support to net,iface (Kristian Evensen)
+  - Sort naturally instead of textual sort (bugzilla #1369)
+  - Do not return with error at 'make modules_install' when modules
+    are not loaded (reported by Oskar Berggren)
+
 7.3
   - ipset: fix spelling error in libipset.3 manpage (Neutron Soutmun)
 
