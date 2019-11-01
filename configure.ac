@@ -581,7 +581,7 @@ fi
 
 AC_MSG_CHECKING([kernel source for netlink extended ACK])
 if test -f $ksourcedir/include/linux/netlink.h && \
-   $AWK '/^extern void netlink_ack\(/,/\)/' $ksourcedir/include/linux/netlink.h | $GREP -q 'const struct netlink_ext_ack'; then
+   $AWK '/void netlink_ack\(/,/\)/' $ksourcedir/include/linux/netlink.h | $GREP -q 'const struct netlink_ext_ack'; then
 	AC_MSG_RESULT(yes)
 	AC_SUBST(HAVE_NETLINK_EXTENDED_ACK, define)
 else
@@ -647,6 +647,17 @@ if test -f $ksourcedir/include/linux/timer.h && \
 else
 	AC_MSG_RESULT(no)
 	AC_SUBST(HAVE_STRSCPY, undef)
+fi
+
+AC_MSG_CHECKING([kernel source for synchronize_rcu_bh() in rcutiny.h and rcupdate.h])
+if test -f $ksourcedir/include/linux/rcupdate.h && \
+   $GREP -q 'static inline void synchronize_rcu_bh' \
+	$ksourcedir/include/linux/rcutiny.h $ksourcedir/include/linux/rcupdate.h; then
+	AC_MSG_RESULT(yes)
+	AC_SUBST(HAVE_SYNCHRONIZE_RCU_BH, define)
+else
+	AC_MSG_RESULT(no)
+	AC_SUBST(HAVE_SYNCHRONIZE_RCU_BH, undef)
 fi
 
 AC_MSG_CHECKING([kernel source for struct net_generic])

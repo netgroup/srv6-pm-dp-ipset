@@ -48,6 +48,7 @@
 #@HAVE_TYPEDEF_SCTP_SCTPHDR_T@ HAVE_TYPEDEF_SCTP_SCTPHDR_T
 #@HAVE_TIMER_SETUP@ HAVE_TIMER_SETUP
 #@HAVE_STRSCPY@ HAVE_STRSCPY
+#@HAVE_SYNCHRONIZE_RCU_BH@ HAVE_SYNCHRONIZE_RCU_BH
 #@HAVE_LOCKDEP_NFNL_IS_HELD@ HAVE_LOCKDEP_NFNL_IS_HELD
 
 #ifdef HAVE_EXPORT_SYMBOL_GPL_IN_MODULE_H
@@ -81,6 +82,10 @@
 
 #include <linux/version.h>
 #include <linux/netlink.h>
+
+#ifdef HAVE_SYNCHRONIZE_RCU_BH
+#define synchronize_rcu()		synchronize_rcu_bh()
+#endif
 
 #ifndef rcu_dereference_bh
 #define rcu_dereference_bh(p)		rcu_dereference(p)
