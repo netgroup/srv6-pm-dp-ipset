@@ -28,6 +28,10 @@ typedef int (*ipset_parsefn)(struct ipset_session *s,
 extern "C" {
 #endif
 
+/* @Andrea */
+extern int ipset_parse_srh(struct ipset_session *session,
+			   enum ipset_opt opt, const char *str);
+
 extern int ipset_parse_ether(struct ipset_session *session,
 			     enum ipset_opt opt, const char *str);
 extern int ipset_parse_port(struct ipset_session *session,

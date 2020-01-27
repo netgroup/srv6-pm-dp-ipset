@@ -4,6 +4,10 @@
  * it under the terms of the GNU General Public License version 2 as
  * published by the Free Software Foundation.
  */
+
+/* @Andrea */
+#include <libipset/nf_seg6.h>
+
 #include <assert.h>				/* assert */
 #include <errno.h>				/* errno */
 #include <limits.h>				/* ULLONG_MAX */
@@ -163,6 +167,83 @@ string_to_u32(struct ipset_session *session,
 	*ret = num;
 
 	return err;
+}
+
+/* @Andrea */
+static int inet_get_addr(const char *src, __u32 *dst, struct in6_addr *dst6)
+{
+	if (strchr(src, ':'))
+		return inet_pton(AF_INET6, src, dst6);
+	else
+		return inet_pton(AF_INET, src, dst);
+}
+
+/* @Andrea */
+static int parse_srh(struct ipv6_sr_hdr **dst,
+		     char *segbuf, bool encap UNUSED)
+{
+	struct ipv6_sr_hdr *srh;
+	int nsegs = 0;
+	int srhlen;
+	char *s;
+	int i;
+
+	s = segbuf;
+	for (i = 0; *s; *s++ == ',' ? i++ : *s);
+	nsegs = i + 1;
+
+	srhlen = 8 + 16*nsegs;
+
+	if (!(srh = malloc(srhlen)))
+		return -ENOMEM;
+
+	memset(srh, 0, srhlen);
+
+	srh->hdrlen = (srhlen >> 3) - 1;
+	srh->type = 4;
+	srh->segments_left = nsegs - 1;
+	srh->first_segment = nsegs - 1;
+
+	i = srh->first_segment;
+	for (s = strtok(segbuf, ","); s; s = strtok(NULL, ",")) {
+		if (1 != inet_get_addr(s, NULL, &srh->segments[i]))
+			return -EINVAL;
+
+		i--;
+	}
+
+	*dst = srh;
+	return 0;
+}
+
+/* @Andrea */
+int ipset_parse_srh(struct ipset_session *session,
+		    enum ipset_opt opt, const char *str)
+{
+	struct ipv6_sr_hdr *srh = NULL;
+	int ret = -EINVAL;
+
+	assert(session);
+	assert(opt == IPSET_OPT_SRH);
+	assert(str);
+	assert(len < 1024);
+
+	if ((ret = parse_srh(&srh, (char *) str, false)))
+		goto out;
+
+	assert(srh);
+
+	if ((ret = ipset_session_data_set(session,
+					  opt, srh))) {
+		free(srh);
+		goto out;
+	}
+
+	return 0;
+
+out:
+	syntax_err("Invalid segment list.");
+	/* syntax_err returns always -1 */
 }
 
 /**

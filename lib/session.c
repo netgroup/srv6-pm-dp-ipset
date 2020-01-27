@@ -562,6 +562,12 @@ static const struct ipset_attr_policy adt_attrs[] = {
 		.type = MNL_TYPE_U16,
 		.opt = IPSET_OPT_SKBQUEUE,
 	},
+	/* @Andrea */
+	[IPSET_ATTR_SRH] = {
+		.type = MNL_TYPE_BINARY,
+		.opt = IPSET_OPT_SRH,
+		.len  = sizeof(struct nf_srh),
+	},
 	[IPSET_ATTR_PAD] = {
 		.type = MNL_TYPE_UNSPEC,
 		.len = 0,

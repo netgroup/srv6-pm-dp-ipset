@@ -16,7 +16,10 @@ IPSET_SETTYPE_LIST = \
 	ipset_hash_netiface.c \
 	ipset_hash_ipmac.c \
 	ipset_hash_mac.c \
-	ipset_list_set.c
+	ipset_list_set.c \
+	ipset_hash_sr6.c
+
+# @Andrea add: ipset_hash_sr6.c
 
 AM_CFLAGS += ${libmnl_CFLAGS}
 

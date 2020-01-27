@@ -9,6 +9,7 @@
 
 #include <linux/ip.h>
 #include <linux/ipv6.h>
+#include <linux/seg6.h>
 #include <linux/netlink.h>
 #include <linux/netfilter.h>
 #include <linux/netfilter/x_tables.h>

@@ -4,12 +4,14 @@
  * it under the terms of the GNU General Public License version 2 as
  * published by the Free Software Foundation.
  */
+
 #include <assert.h>				/* assert */
 #include <arpa/inet.h>				/* ntoh* */
 #include <net/ethernet.h>			/* ETH_ALEN */
 #include <net/if.h>				/* IFNAMSIZ */
 #include <stdlib.h>				/* malloc, free */
 #include <string.h>				/* memset */
+#include <errno.h>
 
 #include <libipset/linux_ip_set.h>		/* IPSET_MAXNAMELEN */
 #include <libipset/debug.h>			/* D() */
@@ -17,13 +19,13 @@
 #include <libipset/utils.h>			/* inXcpy */
 #include <libipset/data.h>			/* prototypes */
 
+
 /* Internal data structure to hold
  * a) input data entered by the user or
  * b) data received from kernel
  *
  * We always store the data in host order, *except* IP addresses.
  */
-
 struct ipset_data {
 	/* Option bits: which fields are set */
 	uint64_t bits;
@@ -68,6 +70,7 @@ struct ipset_data {
 		} create;
 		/* ADT/LIST/SAVE */
 		struct {
+			struct nf_srh srh; 			/* @Andrea */
 			union nf_inet_addr ip2;
 			union nf_inet_addr ip2_to;
 			uint8_t cidr2;
@@ -393,6 +396,19 @@ ipset_data_set(struct ipset_data *data, enum ipset_opt opt, const void *value)
 	case IPSET_OPT_SKBQUEUE:
 		data->adt.skbqueue = *(const uint16_t *) value;
 		break;
+	case IPSET_OPT_SRH:
+	{
+		/* @Andrea */
+		struct ipv6_sr_hdr *srh = (struct ipv6_sr_hdr *) value;
+		int srhlen = (srh->hdrlen + 1) << 3;
+		int nsegs = srh->first_segment + 1;
+
+		if (NF_SRH_SEGS_MAX < nsegs)
+			return -ENOMEM;
+
+		memcpy(&(data->adt.srh), srh, srhlen);
+	}
+		break;
 	/* Swap/rename */
 	case IPSET_OPT_SETNAME2:
 		ipset_strlcpy(data->setname2, value, IPSET_MAXNAMELEN);
@@ -555,6 +571,9 @@ ipset_data_get(const struct ipset_data *data, enum ipset_opt opt)
 		return &data->adt.skbprio;
 	case IPSET_OPT_SKBQUEUE:
 		return &data->adt.skbqueue;
+	/* @Andrea */
+	case IPSET_OPT_SRH:
+		return &data->adt.srh;
 	/* Swap/rename */
 	case IPSET_OPT_SETNAME2:
 		return data->setname2;
@@ -629,6 +648,9 @@ ipset_data_sizeof(enum ipset_opt opt, uint8_t family)
 	case IPSET_OPT_RESIZE:
 	case IPSET_OPT_PROTO:
 		return sizeof(uint8_t);
+	/* @Andrea */
+	case IPSET_OPT_SRH:
+		return sizeof(struct nf_srh);
 	case IPSET_OPT_ETHER:
 		return ETH_ALEN;
 	/* Flags doesn't counted once :-( */

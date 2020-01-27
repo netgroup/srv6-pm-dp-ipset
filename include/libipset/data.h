@@ -10,6 +10,9 @@
 #include <stdbool.h>				/* bool */
 #include <libipset/nf_inet_addr.h>		/* union nf_inet_addr */
 
+/* srh with fixed SRH list size */
+#include <libipset/nf_seg6.h>
+
 /* Data options */
 enum ipset_opt {
 	IPSET_OPT_NONE = 0,
@@ -50,6 +53,7 @@ enum ipset_opt {
 	IPSET_OPT_IP2_TO,
 	IPSET_OPT_PROTO,
 	IPSET_OPT_IFACE,
+	IPSET_OPT_SRH,	/*@Andrea */
 	/* Swap/rename to */
 	IPSET_OPT_SETNAME2,
 	/* Flags */

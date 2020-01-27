@@ -17,6 +17,10 @@ typedef int (*ipset_printfn)(char *buf, unsigned int len,
 extern "C" {
 #endif
 
+/* @Andrea */
+extern int ipset_print_srh(char *buf, unsigned int len,
+		  const struct ipset_data *data, enum ipset_opt opt,
+		  uint8_t env);
 extern int ipset_print_ether(char *buf, unsigned int len,
 			     const struct ipset_data *data,
 			     enum ipset_opt opt, uint8_t env);

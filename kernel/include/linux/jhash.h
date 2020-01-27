@@ -134,9 +134,12 @@ static inline u32 jhash2(const u32 *k, u32 length, u32 initval)
 	/* Handle the last 3 u32's: all the case statements fall through */
 	switch (length) {
 	case 3: c += k[2];
+		/* fall through  */
 	case 2: b += k[1];
+		/* fall through  */
 	case 1: a += k[0];
 		__jhash_final(a, b, c);
+		/* fall through  */
 	case 0:	/* Nothing left to add */
 		break;
 	}

@@ -216,7 +216,6 @@ htable_bits(u32 hashsize)
 #undef mtype_data_match
 
 #undef htype
-#undef HKEY
 
 #define mtype_data_equal	IPSET_TOKEN(MTYPE, _data_equal)
 #ifdef IP_SET_HASH_WITH_NETS
@@ -263,6 +262,7 @@ htable_bits(u32 hashsize)
 
 #define htype			MTYPE
 
+#ifndef HKEY
 #define HKEY(data, initval, htable_bits)			\
 ({								\
 	const u32 *__k = (const u32 *)data;			\
@@ -272,6 +272,7 @@ htable_bits(u32 hashsize)
 								\
 	jhash2(__k, __l, initval) & jhash_mask(htable_bits);	\
 })
+#endif
 
 /* The generic hash structure */
 struct htype {
@@ -1351,3 +1352,4 @@ IPSET_TOKEN(HTYPE, _create)(struct net *net, struct ip_set *set,
 #endif /* IP_SET_EMIT_CREATE */
 
 #undef HKEY_DATALEN
+#undef HKEY

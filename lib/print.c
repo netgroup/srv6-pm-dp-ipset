@@ -26,6 +26,7 @@
 #include <libipset/ipset.h>			/* IPSET_ENV_* */
 #include <libipset/print.h>			/* prototypes */
 
+
 /* Print data (to output buffer). All function must follow snprintf. */
 
 #define SNPRINTF_FAILURE(size, len, offset)			\
@@ -35,6 +36,70 @@ do {								\
 	offset += size;						\
 	len -= size;						\
 } while (0)
+
+/* @Andrea */
+static const char *rt_addr_n2a_r(int af, int len,
+			  const void *addr, char *buf, int buflen)
+{
+	switch (af) {
+	case AF_INET:
+	case AF_INET6:
+		return inet_ntop(af, addr, buf, buflen);
+	default:
+		return "???";
+	}
+}
+
+/* @Andrea */
+static const char *rt_addr_n2a(int af, int len, const void *addr)
+{
+	static char buf[256];
+
+	return rt_addr_n2a_r(af, len, addr, buf, 256);
+}
+
+/* @Andrea */
+int
+ipset_print_srh(char *buf, unsigned int len,
+		  const struct ipset_data *data, enum ipset_opt opt,
+		  uint8_t env UNUSED)
+{
+	int i, size, offset = 0;
+	struct ipv6_sr_hdr *srh;
+	int nsegs;
+
+	assert(buf);
+	assert(len > 0);
+	assert(data);
+	assert(opt == IPSET_OPT_SRH);
+
+	srh = (struct ipv6_sr_hdr *) ipset_data_get(data, opt);
+	assert(srh);
+
+	nsegs = srh->first_segment + 1;
+
+	/*
+	 * nsegs are printed out using INET6_ADDRESSLEN chars (at most).
+	 * segs are separated using (nsegs-1) "," and 16 chars are left
+	 * for decorating the output.
+	 */
+	if (len <= (nsegs * INET6_ADDRSTRLEN + (nsegs - 1) + 16))
+		return -ENOMEM;
+
+	size = snprintf(buf, len, "segs %d [ ", nsegs);
+	SNPRINTF_FAILURE(size, len, offset);
+
+	for (i = srh->first_segment; i >= 0; i--) {
+		size = snprintf(buf + offset, len, "%s ",
+				rt_addr_n2a(AF_INET6, 16, &srh->segments[i]));
+		SNPRINTF_FAILURE(size, len, offset);
+	}
+
+	size = snprintf(buf + offset, len, "]");
+	SNPRINTF_FAILURE(size, len, offset);
+
+	return offset;
+}
 
 /**
  * ipset_print_ether - print ethernet address to string
